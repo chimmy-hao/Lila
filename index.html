@@ -2,8 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Seguimiento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#e91e63">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Lila</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="stylesheet" href="style.css">
@@ -12,7 +15,7 @@
 
     <div id="pantalla-inicio" class="app-container">
         <header class="header-pink">
-            <div class="logo">RAFFO<span>Fem</span></div>
+            <div class="logo">Lila<span>Fem</span></div>
         </header>
         
         <div class="config-notificacion">
@@ -43,7 +46,10 @@
 
     <div id="pantalla-blister" class="app-container" style="display: none;">
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">← Volver</button>
-        <header><h2 class="titulo-blister">Kirum</h2></header>
+        <header>
+            <h2 class="titulo-blister">Kirum</h2>
+            <p>Drospirenona / Etinilestradiolo</p>
+        </header>
         <div id="blister-grid" class="grid-container"></div>
         <button onclick="reiniciarBlister()" class="btn-reset">Reiniciar Mes</button>
     </div>
@@ -53,6 +59,10 @@
         <header><h2 style="color: #d81b60; margin-top: 40px;">¿Qué hacer?</h2></header>
         <div class="info-olvido">
             <div class="alerta-box"><strong>Regla:</strong> Menos de 12h no hay riesgo.</div>
+            <ul class="lista-instrucciones">
+                <li>Toma la pastilla olvidada de inmediato.</li>
+                <li>Sigue con el resto a tu hora habitual.</li>
+            </ul>
         </div>
     </div>
 

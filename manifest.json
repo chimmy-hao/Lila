@@ -1,6 +1,7 @@
 {
+  "id": "/Lila/",
   "short_name": "Lila",
-  "name": "Lila",
+  "name": "Lila Seguimiento",
   "icons": [
     {
       "src": "icono.png",
@@ -13,9 +14,9 @@
       "type": "image/png"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "/Lila/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#e91e63",
-  "scope": "./"
+  "scope": "/Lila/"
 }

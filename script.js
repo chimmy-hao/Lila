@@ -1,3 +1,12 @@
+function mostrarPantalla(id) {
+    // Ocultar todas las pantallas
+    document.getElementById('pantalla-inicio').style.display = 'none';
+    document.getElementById('pantalla-blister').style.display = 'none';
+    
+    // Mostrar la seleccionada
+    document.getElementById(id).style.display = 'block';
+}
+// ... (aquí sigue el código anterior que genera los 28 círculos)
 const grid = document.getElementById('blister-grid');
 const totalDias = 28;
 

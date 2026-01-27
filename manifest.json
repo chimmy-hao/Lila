@@ -1,0 +1,16 @@
+{
+  "short_name": "Lila",
+  "name": "Lila",
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#e91e63",
+  "background_color": "#ffffff"
+}

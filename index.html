@@ -1,113 +1,94 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#e91e63">
-    <title>Lila</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.jpg">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+let diaActivoGlobal = null;
 
-    <div id="pantalla-inicio" class="app-container">
-        <div class="header-bienvenida">
-            <img src="icon.jpg" alt="Perfil" class="perfil-img">
-            <div class="texto-bienvenida">
-                <h1>¡Bienvenida!</h1>
-                <p>Jime</p>
-            </div>
-        </div>
-        <div class="search-box"><p>¿Qué has hecho hoy?</p></div>
+function mostrarPantalla(id) {
+    const pantallas = ['pantalla-inicio', 'pantalla-blister', 'pantalla-estado', 'pantalla-actividad', 'pantalla-calendario', 'pantalla-ayuda', 'pantalla-config'];
+    pantallas.forEach(p => document.getElementById(p).style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    
+    if(id === 'pantalla-calendario') {
+        const hoy = new Date();
+        diaActivoGlobal = `${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
+        generarCalendarioMensual();
+        verDetalleDia(diaActivoGlobal);
+    }
+}
+
+function generarCalendarioMensual() {
+    const grid = document.getElementById('calendario-mensual-grid');
+    const displayMes = document.getElementById('mes-actual-nombre');
+    const ahora = new Date();
+    const mes = ahora.getMonth();
+    const anio = ahora.getFullYear();
+    
+    displayMes.innerText = ahora.toLocaleDateString("es-AR", { month: 'long', year: 'numeric' }).toUpperCase();
+    grid.innerHTML = '';
+
+    const primerDia = new Date(anio, mes, 1).getDay();
+    const totalDias = new Date(anio, mes + 1, 0).getDate();
+    const offset = primerDia === 0 ? 6 : primerDia - 1;
+
+    for(let i = 0; i < offset; i++) grid.innerHTML += `<div class="calendar-day" style="border:none"></div>`;
+
+    const historial = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+
+    for(let d = 1; d <= totalDias; d++) {
+        const fechaLoop = `${d}/${mes + 1}/${anio}`;
+        const emojis = historial[fechaLoop] ? historial[fechaLoop].filter(v => v.length <= 2).join('') : '';
+        const clHoy = d === ahora.getDate() ? 'today' : '';
+        const clSel = fechaLoop === diaActivoGlobal ? 'selected' : '';
         
-        <h2 class="seccion-titulo">Categorías</h2>
-        <div class="menu-grid-canva">
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-blister')"><img src="iconos/blister.png" alt="Blister"><span>Mi Blíster</span></div>
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-estado')"><img src="iconos/estado.png" alt="Estado"><span>Estado</span></div>
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-actividad')"><img src="iconos/actividad.png" alt="Actividad"><span>Actividad</span></div>
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-calendario')"><img src="iconos/calendario.png" alt="Calendario"><span>Calendario</span></div>
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-ayuda')"><img src="iconos/ayuda.png" alt="Help"><span>Help</span></div>
-            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-config')"><img src="iconos/config.png" alt="Config"><span>Config</span></div>
-        </div>
-    </div>
+        grid.innerHTML += `
+            <div class="calendar-day ${clHoy} ${clSel}" onclick="verDetalleDia('${fechaLoop}')">
+                <span>${d}</span>
+                <div class="emojis-day">${emojis}</div>
+            </div>
+        `;
+    }
+}
 
-    <div id="pantalla-blister" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <header class="header-blister">
-            <h2 id="display-pastilla">Kirum</h2>
-            <p id="info-quedan">Te quedan: 28 pastillas</p>
-        </header>
-        <div id="blister-grid" class="grid-container"></div>
-        <div class="blister-footer">
-            <button onclick="verHistorialCiclos()" class="btn-secundario">📋 Ver Meses Anteriores</button>
-            <button onclick="confirmarReinicio()" class="btn-reset">Nuevo Ciclo</button>
-        </div>
-    </div>
+function verDetalleDia(fecha) {
+    diaActivoGlobal = fecha;
+    // Actualizar visual del calendario
+    document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+    generarCalendarioMensual(); // Refrescar para marcar el seleccionado
 
-    <div id="pantalla-estado" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3>¿Cómo te sientes hoy?</h3>
-        <div class="selector-grid" id="grid-estados">
-            <div class="check-item" data-val="😄">😄 Feliz</div>
-            <div class="check-item" data-val="😌">😌 Tranquila</div>
-            <div class="check-item" data-val="😪">😪 Frustrada</div>
-            <div class="check-item" data-val="🫩">🫩 Decaída</div>
-            <div class="check-item" data-val="🤕">🤕 Dolorida</div>
-            <div class="check-item" data-val="🤒">🤒 Enferma</div>
-            <div class="check-item" data-val="😭">😭 Triste</div>
-            <div class="check-item" data-val="😬">😬 Estresada</div>
-            <div class="check-item" data-val="😠">😠 Enojada</div>
-        </div>
-        <button class="btn-guardar" onclick="guardarSeleccion('estado')">Guardar Estado</button>
-    </div>
+    const displayFecha = document.getElementById('fecha-seleccionada');
+    const displayContenido = document.getElementById('contenido-detalle');
+    
+    displayFecha.innerText = fecha === new Date().toLocaleDateString("es-AR") ? "Hoy, " + fecha : fecha;
+    
+    const historial = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+    const datos = historial[fecha] || [];
+    
+    displayContenido.innerHTML = '';
+    
+    if(datos.length === 0) {
+        displayContenido.innerHTML = '<div>Nada registrado aún.</div>';
+    } else {
+        datos.forEach(item => {
+            const esEmoji = item.length <= 2;
+            displayContenido.innerHTML += `
+                <div>${esEmoji ? '✨' : '📝'} ${item}</div>
+            `;
+        });
+    }
+}
 
-    <div id="pantalla-actividad" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3>¿Qué hiciste hoy?</h3>
-        <div class="selector-grid" id="grid-actividades">
-            <div class="check-item" data-val="📚">📚 Estudio</div>
-            <div class="check-item" data-val="💼">💼 Trabajo</div>
-            <div class="check-item" data-val="🏡">🏡 En casa</div>
-            <div class="check-item" data-val="⛲️">⛲️ Salida</div>
-            <div class="check-item" data-val="🩰">🩰 Danza</div>
-            <div class="check-item" data-val="🫂">🫂 Juntada</div>
-            <div class="check-item" data-val="💕">💕 Cita</div>
-        </div>
-        <button class="btn-guardar" onclick="guardarSeleccion('actividad')">Guardar Actividad</button>
-    </div>
+// LÓGICA DE NOTAS
+function abrirModalNota() { document.getElementById('modal-nota').style.display = 'flex'; }
+function cerrarModalNota() { document.getElementById('modal-nota').style.display = 'none'; document.getElementById('texto-nota').value = ''; }
 
-    <div id="pantalla-calendario" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3 id="mes-actual-nombre">Enero 2026</h3>
-        <div class="dias-semana"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-        <div id="calendario-mensual-grid" class="calendar-grid"></div>
-    </div>
+function guardarNota() {
+    const texto = document.getElementById('texto-nota').value;
+    if(!texto) return;
 
-    <div id="pantalla-ayuda" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3>Guía y Olvidos</h3>
-        <div class="ayuda-texto">
-            <div class="alerta-box"><strong>Olvido -12h:</strong> Toma la pastilla ya.</div>
-            <div class="alerta-box" style="border-color: red; background: #fff1f1;"><strong>Olvido +12h:</strong> Usa protección extra (preservativo) por 7 días.</div>
-            <hr>
-            <p><strong>Kirum:</strong> 21 pastillas activas y 7 rosas de descanso.</p>
-        </div>
-    </div>
+    let historial = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+    if(!historial[diaActivoGlobal]) historial[diaActivoGlobal] = [];
+    historial[diaActivoGlobal].push(texto);
+    
+    localStorage.setItem('historial_lila', JSON.stringify(historial));
+    cerrarModalNota();
+    verDetalleDia(diaActivoGlobal);
+}
 
-    <div id="pantalla-config" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3>Configuración</h3>
-        <div class="config-box">
-            <label>Recordatorio Kirum:</label>
-            <input type="time" id="hora-notificacion" onchange="programarNotificacion()">
-            <hr>
-            <label>Recordatorio Diario (Estado/Actividad):</label>
-            <input type="time" id="hora-registro" onchange="programarNotificacionRegistro()">
-            <p style="font-size: 11px;">Opcional: Te avisa para que no olvides registrar tu día.</p>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+// [MANTENER EL RESTO DE FUNCIONES DE BLISTER Y CONFIG]

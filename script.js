@@ -1,10 +1,5 @@
-// REGISTRO DEL SERVICE WORKER (Para que Android deje instalar la app)
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker registrado', reg))
-            .catch(err => console.log('Error al registrar SW', err));
-    });
+    navigator.serviceWorker.register('/Lila/sw.js').then(() => console.log("SW OK"));
 }
 
 function mostrarPantalla(id) {
@@ -14,33 +9,24 @@ function mostrarPantalla(id) {
     document.getElementById(id).style.display = 'block';
 }
 
-// --- NOTIFICACIONES ---
 function solicitarPermiso() {
     Notification.requestPermission().then(perm => {
-        if (perm === "granted") {
-            alert("¡Notificaciones activadas!");
-            document.getElementById('btn-permiso').innerText = "Alertas listas ✅";
-        }
+        if (perm === "granted") alert("¡Notificaciones activas!");
     });
 }
 
 function programarNotificacion() {
-    const horaInput = document.getElementById('hora-notificacion').value;
-    localStorage.setItem('horaAlarma', horaInput);
-    
+    const hora = document.getElementById('hora-notificacion').value;
+    localStorage.setItem('horaAlarma', hora);
     setInterval(() => {
         const ahora = new Date();
-        const horaActual = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
-        if (horaActual === horaInput && Notification.permission === "granted") {
-            new Notification("Lila Recordatorio", {
-                body: "Es hora de tu pastilla. ¡Que no se te pase!",
-                icon: "icono.png"
-            });
+        const actual = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+        if (actual === hora && Notification.permission === "granted") {
+            new Notification("Lila", { body: "Es hora de tu pastilla 🌸", icon: "icono.png" });
         }
     }, 60000);
 }
 
-// --- EL BLÍSTER ---
 function generarBlister() {
     const grid = document.getElementById('blister-grid');
     grid.innerHTML = '';
@@ -50,27 +36,16 @@ function generarBlister() {
         div.innerText = i;
         if (i > 21) div.classList.add('placebo');
         if (localStorage.getItem('dia-' + i) === 'tomada') div.classList.add('tomada');
-
         div.onclick = function() {
             this.classList.toggle('tomada');
-            if (this.classList.contains('tomada')) {
-                localStorage.setItem('dia-' + i, 'tomada');
-            } else {
-                localStorage.removeItem('dia-' + i);
-            }
+            if (this.classList.contains('tomada')) localStorage.setItem('dia-' + i, 'tomada');
+            else localStorage.removeItem('dia-' + i);
         };
         grid.appendChild(div);
     }
 }
 
-function reiniciarBlister() {
-    if(confirm("¿Reiniciar el mes?")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-window.onload = function() {
+window.onload = () => {
     generarBlister();
     if(localStorage.getItem('horaAlarma')) {
         document.getElementById('hora-notificacion').value = localStorage.getItem('horaAlarma');

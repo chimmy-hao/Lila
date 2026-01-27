@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#e91e63">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Lila</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icono.png">
@@ -14,55 +12,132 @@
 <body>
 
     <div id="pantalla-inicio" class="app-container">
-        <header class="header-pink">
-            <div class="logo">Lila<span>Fem</span></div>
-        </header>
+        <div class="header-bienvenida">
+            <img src="icon.png" alt="Perfil" class="perfil-img">
+            <div class="texto-bienvenida">
+                <h1>¡Bienvenida!</h1>
+                <p>Jime</p>
+            </div>
+        </div>
         
-        <div class="config-notificacion">
-            <p>Recordatorio diario:</p>
-            <input type="time" id="hora-notificacion" onchange="programarNotificacion()">
-            <button onclick="solicitarPermiso()" id="btn-permiso">Activar Alertas</button>
+        <div class="search-box">
+            <p>¿Qué has hecho hoy?</p>
         </div>
 
-        <div class="menu-grid">
-            <div class="menu-item" onclick="mostrarPantalla('pantalla-blister')">
-                <div class="icon">💊</div>
+        <h2 class="seccion-titulo">Categorías</h2>
+        <div class="menu-grid-canva">
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-blister')">
+                <img src="iconos/blister.png" alt="Blister">
                 <span>Mi Blíster</span>
             </div>
-            <div class="menu-item" onclick="mostrarPantalla('pantalla-olvido')">
-                <div class="icon">❓</div>
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-olvido')">
+                <img src="iconos/olvido.png" alt="Olvido">
                 <span>Me olvidé</span>
             </div>
-            <div class="menu-item">
-                <div class="icon">👩</div>
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-estado')">
+                <img src="iconos/estado.png" alt="Estado">
                 <span>Estado</span>
             </div>
-            <div class="menu-item">
-                <div class="icon">📋</div>
-                <span>Dudas</span>
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-actividad')">
+                <img src="iconos/actividad.png" alt="Actividad">
+                <span>Actividad</span>
+            </div>
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-ayuda')">
+                <img src="iconos/ayuda.png" alt="Ayuda">
+                <span>Help</span>
+            </div>
+            <div class="menu-item-c" onclick="mostrarPantalla('pantalla-config')">
+                <img src="iconos/config.png" alt="Config">
+                <span>Config</span>
             </div>
         </div>
     </div>
 
     <div id="pantalla-blister" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">← Volver</button>
-        <header>
-            <h2 class="titulo-blister">Kirum</h2>
-            <p>Drospirenona / Etinilestradiolo</p>
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <header class="header-blister">
+            <h2 id="display-pastilla">Kirum</h2>
+            <p id="info-quedan">Te quedan: 28 pastillas</p>
         </header>
         <div id="blister-grid" class="grid-container"></div>
-        <button onclick="reiniciarBlister()" class="btn-reset">Reiniciar Mes</button>
+        
+        <div class="blister-footer">
+            <button onclick="verHistorialCiclos()" class="btn-secundario">📋 Ver Meses Anteriores</button>
+            <button onclick="confirmarReinicio()" class="btn-reset">Reiniciar Mes Manual</button>
+        </div>
+
+        <div id="modal-historial" class="modal" style="display:none;">
+            <div class="modal-content">
+                <h3>Historial de Ciclos</h3>
+                <div id="lista-ciclos"></div>
+                <button onclick="cerrarModal()" class="btn-mini">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-estado" class="app-container" style="display: none;">
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <h3>¿Cómo te sientes hoy?</h3>
+        <div class="selector-grid">
+            <button onclick="guardarDato('estado', 'Feliz 😄')">😄 Feliz</button>
+            <button onclick="guardarDato('estado', 'Tranquila 😌')">😌 Tranquila</button>
+            <button onclick="guardarDato('estado', 'Frustrada 😪')">😪 Frustrada</button>
+            <button onclick="guardarDato('estado', 'Decaída 🫩')">🫩 Decaída</button>
+            <button onclick="guardarDato('estado', 'Adolorida 🤕')">🤕 Adolorida</button>
+            <button onclick="guardarDato('estado', 'Enferma 🤒')">🤒 Enferma</button>
+            <button onclick="guardarDato('estado', 'Triste 😭')">😭 Triste</button>
+            <button onclick="guardarDato('estado', 'Estresada 😬')">😬 Estresada</button>
+            <button onclick="guardarDato('estado', 'Enojada 😠')">😠 Enojada</button>
+        </div>
+        <div id="historial-estado" class="historial"></div>
+    </div>
+
+    <div id="pantalla-actividad" class="app-container" style="display: none;">
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <h3>¿Qué hiciste hoy?</h3>
+        <div class="selector-grid">
+            <button onclick="guardarDato('actividad', 'Estudio 📚')">📚 Estudio</button>
+            <button onclick="guardarDato('actividad', 'Trabajo 💼')">💼 Trabajo</button>
+            <button onclick="guardarDato('actividad', 'En casa 🏡')">🏡 En casa</button>
+            <button onclick="guardarDato('actividad', 'Salida ⛲️')">⛲️ Salida</button>
+            <button onclick="guardarDato('actividad', 'Danza 🩰')">🩰 Danza</button>
+            <button onclick="guardarDato('actividad', 'Juntada 🫂')">🫂 Juntada</button>
+            <button onclick="guardarDato('actividad', 'Cita 💕')">💕 Cita</button>
+        </div>
+        <div id="historial-actividad" class="historial"></div>
+    </div>
+
+    <div id="pantalla-config" class="app-container" style="display: none;">
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <h3>Configuración</h3>
+        <div class="config-box">
+            <label>Recordatorio:</label>
+            <input type="time" id="hora-notificacion" onchange="programarNotificacion()">
+            <button onclick="solicitarPermiso()" class="btn-mini">Activar Alertas</button>
+            <hr>
+            <label>Tipo de Kirum:</label>
+            <select id="select-pastilla" onchange="cambiarConfigPastilla()">
+                <option value="Kirum (3mg/0.02mg)">Kirum 20</option>
+                <option value="Kirum (3mg/0.03mg)">Kirum 30</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="pantalla-ayuda" class="app-container" style="display: none;">
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <h3>Guía Kirum</h3>
+        <div class="ayuda-texto">
+            <p><strong>Toma diaria:</strong> 1 comprimido cada 24hs.</p>
+            <p><strong>Ciclo:</strong> 21 pastillas activas y 7 placebos.</p>
+            <p><strong>Eficacia:</strong> No interrumpas la toma para estar protegida.</p>
+        </div>
     </div>
 
     <div id="pantalla-olvido" class="app-container" style="display: none;">
-        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">← Volver</button>
-        <header><h2 style="color: #d81b60; margin-top: 40px;">¿Qué hacer?</h2></header>
+        <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
+        <h3>Olvido</h3>
         <div class="info-olvido">
-            <div class="alerta-box"><strong>Regla:</strong> Menos de 12h no hay riesgo.</div>
-            <ul class="lista-instrucciones">
-                <li>Toma la pastilla olvidada de inmediato.</li>
-                <li>Sigue con el resto a tu hora habitual.</li>
-            </ul>
+            <div class="alerta-box">Si pasaron más de 12hs, usa protección extra.</div>
         </div>
     </div>
 

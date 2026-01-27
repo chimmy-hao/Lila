@@ -1,3 +1,12 @@
+// REGISTRO DEL SERVICE WORKER (Para que Android deje instalar la app)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registrado', reg))
+            .catch(err => console.log('Error al registrar SW', err));
+    });
+}
+
 function mostrarPantalla(id) {
     document.getElementById('pantalla-inicio').style.display = 'none';
     document.getElementById('pantalla-blister').style.display = 'none';
@@ -5,7 +14,7 @@ function mostrarPantalla(id) {
     document.getElementById(id).style.display = 'block';
 }
 
-// --- LÓGICA DE NOTIFICACIONES ---
+// --- NOTIFICACIONES ---
 function solicitarPermiso() {
     Notification.requestPermission().then(perm => {
         if (perm === "granted") {
@@ -19,21 +28,19 @@ function programarNotificacion() {
     const horaInput = document.getElementById('hora-notificacion').value;
     localStorage.setItem('horaAlarma', horaInput);
     
-    // Para una app web simple, chequeamos la hora cada minuto
     setInterval(() => {
         const ahora = new Date();
         const horaActual = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
-        
         if (horaActual === horaInput && Notification.permission === "granted") {
-            new Notification("Recordatorio RaffoFem", {
-                body: "Es hora de tomar tu pastilla. ¡No lo olvides!",
-                icon: "https://cdn-icons-png.flaticon.com/512/822/822143.png"
+            new Notification("Lila Recordatorio", {
+                body: "Es hora de tu pastilla. ¡Que no se te pase!",
+                icon: "icono.png"
             });
         }
-    }, 60000); // Revisa cada 60 segundos
+    }, 60000);
 }
 
-// --- LÓGICA DEL BLÍSTER ---
+// --- EL BLÍSTER ---
 function generarBlister() {
     const grid = document.getElementById('blister-grid');
     grid.innerHTML = '';
@@ -65,7 +72,6 @@ function reiniciarBlister() {
 
 window.onload = function() {
     generarBlister();
-    // Cargar hora guardada si existe
     if(localStorage.getItem('horaAlarma')) {
         document.getElementById('hora-notificacion').value = localStorage.getItem('horaAlarma');
         programarNotificacion();

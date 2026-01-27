@@ -1,23 +1,91 @@
-function mostrarPantalla(id) {
-    const pantallas = ['pantalla-inicio', 'pantalla-blister', 'pantalla-estado', 'pantalla-actividad', 'pantalla-config', 'pantalla-ayuda', 'pantalla-olvido'];
-    pantallas.forEach(p => document.getElementById(p).style.display = 'none');
-    document.getElementById(id).style.display = 'block';
-    if(id === 'pantalla-blister') { generarBlister(); actualizarContador(); }
-    if(id === 'pantalla-estado') actualizarLista('estado');
-    if(id === 'pantalla-actividad') actualizarLista('actividad');
+// CONFIGURACIÓN DE ZONA HORARIA (Buenos Aires)
+const getFechaBA = () => new Date().toLocaleDateString("es-AR");
+
+// REGISTRO DE SELECCIÓN MÚLTIPLE
+document.querySelectorAll('.check-item').forEach(item => {
+    item.onclick = function() { this.classList.toggle('selected'); }
+});
+
+function guardarSeleccion(tipo) {
+    const fecha = getFechaBA();
+    const seleccionados = Array.from(document.querySelectorAll(`#grid-${tipo}s .selected`)).map(el => el.getAttribute('data-val'));
+    
+    if(seleccionados.length === 0) return alert("Selecciona al menos una opción");
+
+    let historial = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+    if(!historial[fecha]) historial[fecha] = [];
+    
+    // Evitar duplicados
+    seleccionados.forEach(s => { if(!historial[fecha].includes(s)) historial[fecha].push(s); });
+    
+    localStorage.setItem('historial_lila', JSON.stringify(historial));
+    alert("¡Guardado en tu calendario! ✨");
+    
+    // Limpiar selección
+    document.querySelectorAll('.check-item').forEach(el => el.classList.remove('selected'));
+    mostrarPantalla('pantalla-inicio');
 }
 
+function mostrarPantalla(id) {
+    const pantallas = ['pantalla-inicio', 'pantalla-blister', 'pantalla-estado', 'pantalla-actividad', 'pantalla-calendario', 'pantalla-ayuda', 'pantalla-config'];
+    pantallas.forEach(p => document.getElementById(p).style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    
+    if(id === 'pantalla-calendario') generarCalendarioMensual();
+}
+
+function generarCalendarioMensual() {
+    const grid = document.getElementById('calendario-mensual-grid');
+    const displayMes = document.getElementById('mes-actual-nombre');
+    const ahora = new Date();
+    const mes = ahora.getMonth();
+    const anio = ahora.getFullYear();
+    
+    displayMes.innerText = ahora.toLocaleDateString("es-AR", { month: 'long', year: 'numeric' }).toUpperCase();
+    grid.innerHTML = '';
+
+    const primerDia = new Date(anio, mes, 1).getDay();
+    const totalDias = new Date(anio, mes + 1, 0).getDate();
+    const offset = primerDia === 0 ? 6 : primerDia - 1; // Ajuste para que empiece en Lunes
+
+    // Espacios vacíos antes del día 1
+    for(let i = 0; i < offset; i++) grid.innerHTML += `<div class="calendar-day" style="border:none"></div>`;
+
+    const historial = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+
+    for(let d = 1; d <= totalDias; d++) {
+        const fechaLoop = `${d}/${mes + 1}/${anio}`;
+        const emojis = historial[fechaLoop] ? historial[fechaLoop].join('') : '';
+        const esHoy = d === ahora.getDate() ? 'today' : '';
+        
+        grid.innerHTML += `
+            <div class="calendar-day ${esHoy}">
+                <span>${d}</span>
+                <div class="emojis-day">${emojis}</div>
+            </div>
+        `;
+    }
+}
+
+// RECORDATORIO OPCIONAL
+function programarNotificacionRegistro() {
+    const hora = document.getElementById('hora-registro').value;
+    localStorage.setItem('alarmaRegistro', hora);
+}
+
+setInterval(() => {
+    const ahora = new Date();
+    const actual = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+    const horaReg = localStorage.getItem('alarmaRegistro');
+    if (actual === horaReg && Notification.permission === "granted") {
+        new Notification("Lila", { body: "¿Cómo estuvo tu día? Entra a registrar tu estado y actividad 🌸" });
+    }
+}, 60000);
+
+// REPETIR LÓGICA DE BLISTER (de los mensajes anteriores)
 function generarBlister() {
     const grid = document.getElementById('blister-grid');
     grid.innerHTML = '';
-    
-    // Verificación automática de fin de ciclo
-    if(localStorage.getItem('dia-28') === 'tomada') {
-        setTimeout(() => {
-            if(confirm("¡Terminaste el blíster! ¿Quieres guardarlo e iniciar uno nuevo?")) confirmarReinicio();
-        }, 300);
-    }
-
     for (let i = 1; i <= 28; i++) {
         let div = document.createElement('div');
         div.classList.add('dia');
@@ -32,52 +100,8 @@ function generarBlister() {
         grid.appendChild(div);
     }
 }
-
 function actualizarContador() {
-    let tomadas = 0;
-    for (let i = 1; i <= 28; i++) { if (localStorage.getItem('dia-' + i) === 'tomada') tomadas++; }
-    document.getElementById('info-quedan').innerText = `Te quedan: ${28 - tomadas} pastillas`;
+    let t = 0; for (let i = 1; i <= 28; i++) if (localStorage.getItem('dia-' + i) === 'tomada') t++;
+    document.getElementById('info-quedan').innerText = `Te quedan: ${28 - t} pastillas`;
 }
-
-function confirmarReinicio() {
-    let tomadas = 0;
-    for (let i = 1; i <= 28; i++) { if (localStorage.getItem('dia-' + i) === 'tomada') tomadas++; }
-    const fecha = new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-    let historial = JSON.parse(localStorage.getItem('historialCiclos') || '[]');
-    historial.unshift({ fecha, resultado: `${tomadas}/28` });
-    localStorage.setItem('historialCiclos', JSON.stringify(historial.slice(0, 12)));
-    
-    for (let i = 1; i <= 28; i++) { localStorage.removeItem('dia-' + i); }
-    generarBlister();
-    actualizarContador();
-}
-
-function verHistorialCiclos() {
-    const modal = document.getElementById('modal-historial');
-    const lista = document.getElementById('lista-ciclos');
-    let historial = JSON.parse(localStorage.getItem('historialCiclos') || '[]');
-    lista.innerHTML = historial.length > 0 ? 
-        historial.map(c => `<div class="item-ciclo"><strong>${c.fecha}:</strong> Tomaste ${c.resultado}</div>`).join('') :
-        "<p>No hay meses guardados.</p>";
-    modal.style.display = 'flex';
-}
-
-function cerrarModal() { document.getElementById('modal-historial').style.display = 'none'; }
-
-function guardarDato(tipo, valor) {
-    const fecha = new Date().toLocaleDateString();
-    let datos = JSON.parse(localStorage.getItem(tipo) || '[]');
-    datos.unshift({ fecha, valor });
-    localStorage.setItem(tipo, JSON.stringify(datos.slice(0, 5)));
-    alert('Registrado: ' + valor);
-}
-
-function actualizarLista(tipo) {
-    const div = document.getElementById('historial-' + tipo);
-    let datos = JSON.parse(localStorage.getItem(tipo) || '[]');
-    div.innerHTML = '<strong>Últimos 5:</strong><br>' + datos.map(d => `${d.fecha}: ${d.valor}`).join('<br>');
-}
-
-window.onload = () => {
-    if(localStorage.getItem('pastillaNombre')) document.getElementById('display-pastilla').innerText = localStorage.getItem('pastillaNombre').split(' (')[0];
-};
+window.onload = () => { generarBlister(); };

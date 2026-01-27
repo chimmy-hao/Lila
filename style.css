@@ -1,0 +1,32 @@
+body { font-family: Arial, sans-serif; background-color: #fce4ec; display: flex; justify-content: center; }
+.app-container { background: white; width: 350px; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+header h1 { color: #d81b60; margin-bottom: 5px; }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columnas como en tu foto */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.dia {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    background-color: #eee;
+}
+
+/* Cuando la pastilla está tomada */
+.dia.tomada {
+    background-color: #f06292;
+    color: white;
+    border-color: #d81b60;
+}
+
+.btn-reset { margin-top: 20px; padding: 10px; border: none; background: #880e4f; color: white; border-radius: 5px; }

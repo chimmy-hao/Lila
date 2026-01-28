@@ -20,7 +20,6 @@
             </div>
         </div>
         <div class="search-box"><p>¿Qué has hecho hoy?</p></div>
-        
         <h2 class="seccion-titulo">Categorías</h2>
         <div class="menu-grid-canva">
             <div class="menu-item-c" onclick="mostrarPantalla('pantalla-blister')"><img src="iconos/blister.png"><span>Mi Blíster</span></div>
@@ -34,12 +33,13 @@
 
     <div id="pantalla-calendario" class="app-container" style="display: none;">
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3 id="mes-actual-nombre">ENERO 2026</h3>
+        <h3 id="mes-actual-nombre" style="color:#e91e63; margin: 10px;">ENERO</h3>
         <div class="dias-semana"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
         <div id="calendario-mensual-grid" class="calendar-grid"></div>
+        
         <div id="detalle-dia" class="detalle-container">
             <h4 id="fecha-seleccionada">Selecciona un día</h4>
-            <div id="contenido-detalle" class="detalle-lista"></div>
+            <div id="contenido-detalle" style="text-align: left; font-size: 14px; color: #666;"></div>
             <button class="btn-float-nota" onclick="abrirModalNota()">+</button>
         </div>
     </div>
@@ -48,15 +48,15 @@
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
         <h3>¿Cómo te sientes?</h3>
         <div class="selector-grid" id="grid-estados">
-            <div class="check-item" data-val="😄" onclick="this.classList.toggle('selected')">Feliz 😄</div>
-            <div class="check-item" data-val="😌" onclick="this.classList.toggle('selected')">Tranquila 😌</div>
-            <div class="check-item" data-val="😪" onclick="this.classList.toggle('selected')">Frustrada 😪</div>
-            <div class="check-item" data-val="🫩" onclick="this.classList.toggle('selected')">Decaída 🫩</div>
-            <div class="check-item" data-val="🤕" onclick="this.classList.toggle('selected')">Adolorida 🤕</div>
-            <div class="check-item" data-val="🤒" onclick="this.classList.toggle('selected')">Enferma 🤒</div>
-            <div class="check-item" data-val="😭" onclick="this.classList.toggle('selected')">Triste 😭</div>
-            <div class="check-item" data-val="😬" onclick="this.classList.toggle('selected')">Estresada 😬</div>
-            <div class="check-item" data-val="😠" onclick="this.classList.toggle('selected')">Enojada 😠</div>
+            <div class="check-item" data-val="😄" onclick="toggleSeleccion(this)">Feliz 😄</div>
+            <div class="check-item" data-val="😌" onclick="toggleSeleccion(this)">Tranquila 😌</div>
+            <div class="check-item" data-val="😪" onclick="toggleSeleccion(this)">Frustrada 😪</div>
+            <div class="check-item" data-val="🫩" onclick="toggleSeleccion(this)">Decaída 🫩</div>
+            <div class="check-item" data-val="🤕" onclick="toggleSeleccion(this)">Adolorida 🤕</div>
+            <div class="check-item" data-val="🤒" onclick="toggleSeleccion(this)">Enferma 🤒</div>
+            <div class="check-item" data-val="😭" onclick="toggleSeleccion(this)">Triste 😭</div>
+            <div class="check-item" data-val="😬" onclick="toggleSeleccion(this)">Estresada 😬</div>
+            <div class="check-item" data-val="😠" onclick="toggleSeleccion(this)">Enojada 😠</div>
         </div>
         <button class="btn-guardar" onclick="guardarSeleccion('estado')">Guardar Estado</button>
     </div>
@@ -65,61 +65,59 @@
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
         <h3>¿Qué hiciste hoy?</h3>
         <div class="selector-grid" id="grid-actividades">
-            <div class="check-item" data-val="📚" onclick="this.classList.toggle('selected')">Estudio 📚</div>
-            <div class="check-item" data-val="💼" onclick="this.classList.toggle('selected')">Trabajo 💼</div>
-            <div class="check-item" data-val="🏡" onclick="this.classList.toggle('selected')">En casa 🏡</div>
-            <div class="check-item" data-val=" Salida ⛲️" onclick="this.classList.toggle('selected')">Salida ⛲️</div>
-            <div class="check-item" data-val="🩰" onclick="this.classList.toggle('selected')">Danza 🩰</div>
-            <div class="check-item" data-val="🫂" onclick="this.classList.toggle('selected')">Juntada 🫂</div>
-            <div class="check-item" data-val="💕" onclick="this.classList.toggle('selected')">Cita 💕</div>
+            <div class="check-item" data-val="📚" onclick="toggleSeleccion(this)">Estudio 📚</div>
+            <div class="check-item" data-val="💼" onclick="toggleSeleccion(this)">Trabajo 💼</div>
+            <div class="check-item" data-val="🏡" onclick="toggleSeleccion(this)">En casa 🏡</div>
+            <div class="check-item" data-val="⛲️" onclick="toggleSeleccion(this)">Salida ⛲️</div>
+            <div class="check-item" data-val="🩰" onclick="toggleSeleccion(this)">Danza 🩰</div>
+            <div class="check-item" data-val="🫂" onclick="toggleSeleccion(this)">Juntada 🫂</div>
+            <div class="check-item" data-val="💕" onclick="toggleSeleccion(this)">Cita 💕</div>
         </div>
         <button class="btn-guardar" onclick="guardarSeleccion('actividad')">Guardar Actividad</button>
     </div>
 
     <div id="pantalla-blister" class="app-container" style="display: none;">
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <header class="header-blister">
-            <h2 id="display-pastilla">Kirum</h2>
+        <header style="padding: 20px;">
+            <h2 id="display-pastilla" style="color: #e91e63;">Kirum</h2>
             <p id="info-quedan">Cargando...</p>
         </header>
         <div id="blister-grid" class="grid-container"></div>
-        <div class="blister-footer">
-            <button onclick="verHistorialCiclos()" class="btn-secundario">📋 Meses Anteriores</button>
-            <button onclick="confirmarReinicio()" class="btn-reset">Nuevo Ciclo</button>
+        <div style="padding: 20px;">
+            <button onclick="verHistorialCiclos()" class="btn-guardar" style="background: #fce4ec; color: #e91e63;">📋 Ver Meses Anteriores</button>
+            <button onclick="confirmarReinicio()" class="btn-guardar" style="background: #eee; color: #666; margin-top: 10px;">Nuevo Ciclo</button>
         </div>
     </div>
 
     <div id="pantalla-ayuda" class="app-container" style="display: none;">
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
-        <h3>Ayuda y Olvidos</h3>
-        <div class="alerta-box"><strong>Olvido < 12h:</strong> Tomala ya.</div>
-        <div class="alerta-box" style="border-color: red;"><strong>Olvido > 12h:</strong> Protección baja. Usá preservativo.</div>
-        <hr>
-        <p><strong>Kirum:</strong> 21 pastillas activas y 7 placebos rosas.</p>
+        <h3>Guía y Olvidos</h3>
+        <div class="alerta-box"><strong>Olvido -12h:</strong> Tomala ya.</div>
+        <div class="alerta-box" style="border-color: red;"><strong>Olvido +12h:</strong> Protección baja. Usá preservativo 7 días.</div>
     </div>
 
     <div id="pantalla-config" class="app-container" style="display: none;">
         <button onclick="mostrarPantalla('pantalla-inicio')" class="btn-volver">←</button>
         <h3>Configuración</h3>
-        <div class="config-box">
-            <label>Hora Alarma Kirum:</label>
-            <input type="time" id="hora-notificacion" onchange="programarNotificacion()">
-            <button onclick="solicitarPermiso()" class="btn-mini">Probar Notificación</button>
+        <div style="padding: 20px; text-align: left;">
+            <label>Hora Alarma:</label>
+            <input type="time" id="hora-notificacion" onchange="programarNotificacion()" style="margin-bottom: 15px; width: 100%;">
+            <button onclick="probarNotificacionDirecta()" class="btn-guardar" style="padding: 8px; font-size: 12px;">Probar Notificación</button>
             <hr>
-            <label>Día que empezaste la caja:</label>
-            <select id="dia-inicio-semana" onchange="actualizarDiaInicio()">
+            <label>Día inicio caja:</label>
+            <select id="dia-inicio-semana" onchange="actualizarDiaInicio()" style="width: 100%; padding: 10px; margin-bottom: 15px;">
                 <option value="0">Lunes</option><option value="1">Martes</option>
                 <option value="2">Miércoles</option><option value="3">Jueves</option>
                 <option value="4">Viernes</option><option value="5">Sábado</option>
                 <option value="6">Domingo</option>
             </select>
             <hr>
-            <label>Tipo de Kirum:</label>
-            <select id="select-pastilla" onchange="cambiarConfigPastilla()">
-                <option value="Kirum (3mg/0.02mg)">Kirum 20 (Suave)</option>
-                <option value="Kirum (3mg/0.03mg)">Kirum 30 (Estándar)</option>
+            <label>Tipo Kirum:</label>
+            <select id="select-pastilla" onchange="cambiarConfigPastilla()" style="width: 100%; padding: 10px;">
+                <option value="Kirum 20">Kirum 20 (Suave)</option>
+                <option value="Kirum 30">Kirum 30 (Estándar)</option>
             </select>
-            <div id="info-kirum-box" class="alerta-box" style="font-size: 11px; margin-top:10px;"></div>
+            <div id="info-kirum-box" class="alerta-box" style="font-size: 11px; margin-top: 10px;"></div>
         </div>
     </div>
 
@@ -128,13 +126,13 @@
             <h3>Añadir Nota</h3>
             <textarea id="texto-nota" placeholder="Escribe aquí..."></textarea>
             <button onclick="guardarNota()" class="btn-guardar">Guardar</button>
-            <button onclick="cerrarModalNota()" style="background:none; border:none; color:gray; margin-top:10px;">Cerrar</button>
+            <button onclick="cerrarModalNota()" style="background:none; border:none; margin-top:10px;">Cerrar</button>
         </div>
     </div>
 
     <div id="modal-historial" class="modal" style="display:none;">
         <div class="modal-content">
-            <h3>Meses Anteriores</h3>
+            <h3>Historial</h3>
             <div id="lista-ciclos"></div>
             <button onclick="document.getElementById('modal-historial').style.display='none'" class="btn-guardar">Cerrar</button>
         </div>

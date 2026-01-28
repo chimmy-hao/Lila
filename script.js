@@ -20,9 +20,7 @@ function mostrarPantalla(id) {
     if(id === 'pantalla-blister') generarBlister();
 }
 
-// ESTA ES LA FUNCIÓN QUE ARREGLA LOS BOTONES
 function toggleSeleccion(elemento) {
-    // Usamos 'selected' porque es lo que está en tu CSS
     elemento.classList.toggle('selected');
 }
 
@@ -30,7 +28,6 @@ function guardarSeleccion(tipo) {
     const fecha = new Date().toLocaleDateString("es-AR");
     const gridId = tipo === 'estado' ? 'grid-estados' : 'grid-actividades';
     
-    // Buscamos elementos con la clase 'selected'
     const seleccionados = Array.from(document.querySelectorAll(`#${gridId} .selected`)).map(el => el.getAttribute('data-val'));
     
     if(seleccionados.length === 0) return alert("Seleccioná al menos uno");
@@ -45,11 +42,11 @@ function guardarSeleccion(tipo) {
     localStorage.setItem('historial_lila', JSON.stringify(historial));
     alert("¡Guardado!");
     
-    // Limpiamos la selección visual
     document.querySelectorAll('.check-item').forEach(el => el.classList.remove('selected'));
     mostrarPantalla('pantalla-inicio');
 }
 
+// CALENDARIO
 function generarCalendarioMensual() {
     const grid = document.getElementById('calendario-mensual-grid');
     const ahora = new Date();
@@ -66,7 +63,7 @@ function generarCalendarioMensual() {
         const datos = historial[fechaLoop] || [];
         const emojis = datos.filter(v => v.length <= 2).join('');
         const hasNota = datos.some(v => v.length > 2);
-        const clSel = fechaLoop === diaActivoGlobal ? 'selected' : ''; // 'selected' para el día del calendario también
+        const clSel = fechaLoop === diaActivoGlobal ? 'selected' : '';
         
         grid.innerHTML += `
             <div class="calendar-day ${clSel}" onclick="verDetalleDia('${fechaLoop}')">
@@ -89,7 +86,6 @@ function verDetalleDia(fecha) {
         datos.map(item => `<div style="margin-bottom:5px;">• ${item}</div>`).join('') : 
         'No hay registros.';
         
-    // Refrescamos para marcar el día seleccionado
     const dias = document.querySelectorAll('.calendar-day');
     dias.forEach(d => d.classList.remove('selected'));
     generarCalendarioMensual(); 
@@ -110,6 +106,7 @@ function guardarNota() {
     verDetalleDia(diaActivoGlobal);
 }
 
+// --- BLISTER CON SEGURIDAD ---
 function generarBlister() {
     const grid = document.getElementById('blister-grid');
     if(!grid) return;
@@ -131,12 +128,30 @@ function generarBlister() {
         let d = document.createElement('div');
         d.className = 'dia';
         if(i > 21) d.classList.add('placebo');
-        if(localStorage.getItem('dia-'+i) === 'tomada') { d.classList.add('tomada'); t++; }
+        
+        // Verificar si está tomada
+        if(localStorage.getItem('dia-'+i) === 'tomada') { 
+            d.classList.add('tomada'); 
+            t++; 
+        }
+        
         d.innerText = i;
+        
+        // NUEVA LÓGICA DE CLIC CON CONFIRMACIÓN
         d.onclick = () => {
-            d.classList.toggle('tomada');
-            localStorage.setItem('dia-'+i, d.classList.contains('tomada') ? 'tomada' : '');
-            generarBlister();
+            if (d.classList.contains('tomada')) {
+                // Si ya está marcada, preguntar antes de borrar
+                if(confirm("¿Segura que querés desmarcar este día?")) {
+                    d.classList.remove('tomada');
+                    localStorage.removeItem('dia-'+i);
+                    generarBlister(); // Recargar para actualizar contador
+                }
+            } else {
+                // Si está vacía, marcar directo
+                d.classList.add('tomada');
+                localStorage.setItem('dia-'+i, 'tomada');
+                generarBlister();
+            }
         };
         grid.appendChild(d);
     }
@@ -157,14 +172,12 @@ function actualizarDiaInicio() {
 
 function confirmarReinicio() {
     if(confirm("¿Seguro querés empezar una caja nueva?")) {
-        // Guardar historial
         let t = 0; for(let i=1; i<=28; i++) if(localStorage.getItem('dia-'+i) === 'tomada') t++;
         const f = new Date().toLocaleDateString("es-AR", { month: 'long', year: 'numeric' });
         let h = JSON.parse(localStorage.getItem('historialCiclos') || '[]');
         h.unshift({ f, r: `${t}/28` });
         localStorage.setItem('historialCiclos', JSON.stringify(h));
         
-        // Borrar
         for(let i=1; i<=28; i++) localStorage.removeItem('dia-'+i);
         generarBlister();
     }

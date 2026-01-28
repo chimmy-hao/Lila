@@ -1,95 +1,83 @@
 let diaActivoGlobal = new Date().toLocaleDateString("es-AR");
 
-const infoKirum = {
-    "Kirum 20 (3mg/0.02mg)": "Kirum 20: Dosis baja de estrógenos (0.02mg). Se usa para minimizar efectos secundarios como náuseas o sensibilidad mamaria.",
-    "Kirum 30 (3mg/0.03mg)": "Kirum 30: Dosis estándar (0.03mg). Ofrece un excelente control del ciclo si hay sangrados entre periodos."
-};
-
+// Navegación segura
 function mostrarPantalla(id) {
-    const pantallas = ['pantalla-inicio', 'pantalla-blister', 'pantalla-estado', 'pantalla-actividad', 'pantalla-calendario', 'pantalla-ayuda', 'pantalla-config'];
-    pantallas.forEach(p => { if(document.getElementById(p)) document.getElementById(p).style.display = 'none'; });
-    document.getElementById(id).style.display = 'block';
-    if(id === 'pantalla-calendario') { generarCalendarioMensual(); verDetalleDia(diaActivoGlobal); }
-    if(id === 'pantalla-blister') { generarBlister(); }
+    const ids = ['pantalla-inicio', 'pantalla-blister', 'pantalla-estado', 'pantalla-actividad', 'pantalla-calendario', 'pantalla-ayuda', 'pantalla-config'];
+    ids.forEach(p => {
+        const el = document.getElementById(p);
+        if(el) el.style.display = 'none';
+    });
+    const destino = document.getElementById(id);
+    if(destino) destino.style.display = 'block';
+
+    if(id === 'pantalla-calendario') generarCalendarioMensual();
+    if(id === 'pantalla-blister') generarBlister();
 }
 
-function cambiarConfigPastilla() {
-    const val = document.getElementById('select-pastilla').value;
-    localStorage.setItem('pastillaNombre', val);
-    document.getElementById('display-pastilla').innerText = val;
-    document.getElementById('info-kirum-box').innerText = infoKirum[val];
+// Registro diario
+function toggleSeleccion(el) { el.classList.toggle('selected'); }
+
+function guardarSeleccion(tipo) {
+    const fecha = new Date().toLocaleDateString("es-AR");
+    const gridId = tipo === 'estado' ? 'grid-estados' : 'grid-actividades';
+    const items = Array.from(document.querySelectorAll(`#${gridId} .selected`)).map(i => i.getAttribute('data-val'));
+    
+    if(items.length === 0) return alert("Seleccioná algo");
+
+    let h = JSON.parse(localStorage.getItem('historial_lila') || '{}');
+    if(!h[fecha]) h[fecha] = [];
+    items.forEach(it => { if(!h[fecha].includes(it)) h[fecha].push(it); });
+    
+    localStorage.setItem('historial_lila', JSON.stringify(h));
+    alert("¡Guardado!");
+    document.querySelectorAll('.check-item').forEach(i => i.classList.remove('selected'));
+    mostrarPantalla('pantalla-inicio');
 }
 
-function actualizarDiaInicio() {
-    const val = document.getElementById('dia-inicio-semana').value;
-    localStorage.setItem('diaInicioSemana', val);
-    generarBlister();
-}
-
+// Blíster
 function generarBlister() {
     const grid = document.getElementById('blister-grid');
+    if(!grid) return;
     grid.innerHTML = '';
     
-    const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-    const inicioIdx = parseInt(localStorage.getItem('diaInicioSemana') || 0);
+    const dias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+    const inicio = parseInt(localStorage.getItem('diaInicioSemana') || 0);
     
-    // Cabecera de días
-    for (let i = 0; i < 7; i++) {
-        let cabecera = document.createElement('div');
-        cabecera.style.fontWeight = "bold";
-        cabecera.style.color = "#e91e63";
-        cabecera.innerText = nombresDias[(inicioIdx + i) % 7];
-        grid.appendChild(cabecera);
+    for(let i=0; i<7; i++) {
+        let d = document.createElement('div');
+        d.className = 'cabecera-dia';
+        d.innerText = dias[(inicio + i) % 7];
+        grid.appendChild(d);
     }
 
-    let tomadas = 0;
-    for (let i = 1; i <= 28; i++) {
-        let div = document.createElement('div');
-        div.className = 'dia';
-        if (i > 21) div.classList.add('placebo');
-        if (localStorage.getItem('dia-' + i) === 'tomada') {
-            div.classList.add('tomada');
-            tomadas++;
-        }
-        div.innerText = i;
-        div.onclick = function() {
-            this.classList.toggle('tomada');
-            localStorage.setItem('dia-' + i, this.classList.contains('tomada') ? 'tomada' : '');
+    let t = 0;
+    for(let i=1; i<=28; i++) {
+        let d = document.createElement('div');
+        d.className = 'dia';
+        if(i > 21) d.classList.add('placebo');
+        if(localStorage.getItem('dia-'+i) === 'tomada') { d.classList.add('tomada'); t++; }
+        d.innerText = i;
+        d.onclick = () => {
+            d.classList.toggle('tomada');
+            localStorage.setItem('dia-'+i, d.classList.contains('tomada') ? 'tomada' : '');
             generarBlister();
         };
-        grid.appendChild(div);
+        grid.appendChild(d);
     }
-    document.getElementById('info-quedan').innerText = `Te quedan: ${28 - tomadas} pastillas`;
+    document.getElementById('info-quedan').innerText = `Te quedan: ${28 - t} pastillas`;
 }
 
-function solicitarPermiso() {
-    Notification.requestPermission().then(perm => {
-        if (perm === "granted") {
-            new Notification("Lila", { body: "¡Notificaciones activadas! 🌸", icon: "icon.jpg" });
-        }
-    });
-}
-
-function programarNotificacion() {
-    const hora = document.getElementById('hora-notificacion').value;
-    localStorage.setItem('hKirum', hora);
-    if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'SET_ALARM', time: hora });
+// Notificaciones
+function probarNotificacionDirecta() {
+    if(Notification.permission === "granted") {
+        new Notification("Lila", { body: "¡Funciona! 🌸", icon: "icon.jpg" });
+    } else {
+        Notification.requestPermission();
     }
 }
 
-// ... (Aquí incluir funciones de calendario y notas del paso anterior)
-
+// Al cargar
 window.onload = () => {
-    if(localStorage.getItem('pastillaNombre')) {
-        document.getElementById('select-pastilla').value = localStorage.getItem('pastillaNombre');
-        cambiarConfigPastilla();
-    }
-    if(localStorage.getItem('diaInicioSemana')) {
-        document.getElementById('dia-inicio-semana').value = localStorage.getItem('diaInicioSemana');
-    }
-    if(localStorage.getItem('hKirum')) {
-        document.getElementById('hora-notificacion').value = localStorage.getItem('hKirum');
-    }
-    generarBlister();
+    mostrarPantalla('pantalla-inicio');
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 };
